@@ -150,7 +150,9 @@ char *mulPowerOfTenStringInt(const char *intA, int exp)
         exp = -exp;
         if (lengthA <= exp) // handles case where -exp is more than what intA has
         {
-            static char tenStringInt[] = "0";
+            char *tenStringInt = new char[2];
+            tenStringInt[0] = '0';
+            tenStringInt[1] = '\0';
             return tenStringInt;
         }
         char *tenStringInt = new char[lengthA - exp + 1];
@@ -456,7 +458,9 @@ char *mulByDigitStringInt(const char *intA, int multiplier)
 {
     if (multiplier == 0)
     {
-        static char resultArray[] = "0";
+        char *resultArray = new char[2];
+        resultArray[0] = '0';
+        resultArray[1] = '\0';
         return resultArray;
     }
 
