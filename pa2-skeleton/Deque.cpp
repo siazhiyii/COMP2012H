@@ -128,20 +128,20 @@ int Deque::back() const
 // TO DO 7
 bool Deque::empty() const
 {
-    Node nextNode = *sentinel->next;
+    Node *nextNode = sentinel->next;
 
-    while (nextNode.next != sentinel)
+    while (nextNode->next != sentinel)
     {
         for (int i = 0; i < CHUNK_SIZE; i++)
         {
-            if (nextNode.arr[i] != 0)
+            if (nextNode->arr[i] != 0)
             {
                 return false;
             }
-            nextNode = *nextNode.next;
         }
+        nextNode = nextNode->next;
     }
-    return sentinel->next == sentinel;
+    return true;
 }
 
 int Deque::size() const
