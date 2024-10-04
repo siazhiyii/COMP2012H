@@ -69,7 +69,7 @@ bool Deque::empty() const
     {
         for (int i = 0; i < CHUNK_SIZE; i++)
         {
-            if (nextNode.arr[i] != NULL)
+            if (nextNode.arr[i] != 0)
             {
                 return false;
             }
@@ -197,30 +197,34 @@ void Deque::pop_front()
 // TO DO 9
 void Deque::print_deque() const
 {
-    if (empty())
+    if (empty)
     {
         std::cout << "[]" << std::endl;
         return;
     }
     std::cout << "[";
-    Node *temp = sentinel->next;
-    while (temp != sentinel)
+    bool beginning = true;
+    Node *nextNode = sentinel->next;
+    while (nextNode != sentinel)
     {
-        for (int i = -1; i < CHUNK_SIZE - 1; i++)
+        for (int i = 0; i < CHUNK_SIZE; i++)
         {
-            if (temp->arr[i + 1] != NULL)
+            if (nextNode->arr[i] != 0)
             {
-                std::cout << temp->arr[i] << ", ";
-            }
-            else
-            {
-                std::cout << temp->arr[i] << "]";
-                break;
+                if (beginning)
+                {
+                    std::cout << nextNode->arr[i];
+                    beginning = false;
+                }
+                else
+                {
+                    std::cout << ", " << nextNode->arr[i];
+                }
             }
         }
-        temp = temp->next;
+        nextNode = nextNode->next;
     }
-    std::cout << std::endl;
+    std::cout << "]" << std::endl;
 }
 
 // TO DO 10
