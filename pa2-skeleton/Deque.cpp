@@ -63,6 +63,19 @@ int Deque::back() const
 // TO DO 7
 bool Deque::empty() const
 {
+    Node nextNode = *sentinel->next;
+
+    while (nextNode.next != sentinel)
+    {
+        for (int i = 0; i < CHUNK_SIZE; i++)
+        {
+            if (nextNode.arr[i] != NULL)
+            {
+                return false;
+            }
+            nextNode = *nextNode.next;
+        }
+    }
     return sentinel->next == sentinel;
 }
 
@@ -195,7 +208,7 @@ void Deque::print_deque() const
     {
         for (int i = -1; i < CHUNK_SIZE - 1; i++)
         {
-            if (temp->arr[i + 1] != -1)
+            if (temp->arr[i + 1] != NULL)
             {
                 std::cout << temp->arr[i] << ", ";
             }
@@ -213,7 +226,7 @@ void Deque::print_deque() const
 // TO DO 10
 void Deque::insert(const Iterator &pos, int val)
 {
-    Node* endNode = sentinel->prev;
+    Node *endNode = sentinel->prev;
     int *curr = this->endIt.curr();
 
     if (pos.curr() == curr)
@@ -222,31 +235,30 @@ void Deque::insert(const Iterator &pos, int val)
         return;
     }
 
-    while (curr != pos.curr()-1)
+    while (curr != pos.curr() - 1)
     {
-            int temp = *curr;
-            if (endNode->arr[CHUNK_SIZE - 1] != -1)
+        int temp = *curr;
+        if (endNode->arr[CHUNK_SIZE - 1] != -1)
+        {
+            Node *newNode = new Node();
+            newNode->arr[0] = temp;
+            newNode->prev = endNode;
+            newNode->next = endNode->next;
+            endNode->next->prev = newNode;
+            endNode->next = newNode;
+            endNode->arr[CHUNK_SIZE - 1] = -1;
+            *curr--;
+        }
+        else
+        {
+            for (int i = CHUNK_SIZE - 1; i > 0; i--)
             {
-                Node *newNode = new Node();
-                newNode->arr[0] = temp;
-                newNode->prev = endNode;
-                newNode->next = endNode->next;
-                endNode->next->prev = newNode;
-                endNode->next = newNode;
-                endNode->arr[CHUNK_SIZE - 1] = -1;
+                endNode->arr[i + 1] = endNode->arr[i];
+                endNode->arr[i] = -1;
                 *curr--;
             }
-            else
-            {
-                for (int i = CHUNK_SIZE - 1; i > 0; i--)
-                {
-                    endNode->arr[i+1] = endNode->arr[i];
-                    endNode->arr[i] = -1;
-                    *curr--;
-                }
-            }
-            endNode = endNode->prev;
-
+        }
+        endNode = endNode->prev;
     }
     *curr = val;
     return;
@@ -330,7 +342,3 @@ void Deque::load_deque(const char *filename)
     file.close();
     return;
 }
-
-
-
-
