@@ -14,7 +14,7 @@ Deque::Deque()
     emptyNode->prev = sentinel;
 
     startIt = Iterator(emptyNode, true);
-    endIt = Iterator(emptyNode, false);
+    endIt = Iterator(emptyNode, true);
 }
 
 Deque::~Deque()
@@ -32,32 +32,97 @@ Deque::~Deque()
 // TO DO 6
 Iterator Deque::begin() const
 {
-    return startIt;
+    Iterator beginIt;
+    Node *firstNode = sentinel->next;
+    while (firstNode != sentinel)
+    {
+        for (int i = 0; i < CHUNK_SIZE; i++)
+        {
+            if (firstNode->arr[i] != 0)
+            {
+                beginIt.current++;
+                beginIt.node = firstNode;
+                break;
+            }
+        }
+        firstNode = firstNode->next;
+        beginIt.current = 0;
+    } 
+    if (firstNode == sentinel)
+    {
+        return startIt;
+    }
+    return beginIt;
 }
 
 Iterator Deque::end() const
 {
-    return endIt;
+    Iterator lastIt;
+    Node *lastNode = sentinel->prev;
+    while (lastNode != sentinel)
+    {
+        for (int i = CHUNK_SIZE - 1; i > -1; i--)
+        {
+            if (lastNode->arr[i] != 0)
+            {
+                if (i == CHUNK_SIZE - 1)
+                {
+                    Node* newNode;
+                    newNode->next = sentinel;
+                    newNode->prev = lastNode;
+                    lastNode->next = newNode;
+                    sentinel->prev = newNode;
+                    lastIt.current = 0;
+                    lastIt.node = newNode;
+                }
+                else
+                {
+                    *lastIt.current = i+1;
+                    lastIt.node = lastNode;
+                }
+                break;
+            }
+        }
+        lastNode = lastNode->prev;
+    } 
+    if (lastNode == sentinel)
+    {
+        return endIt;
+    }
+    return lastIt;
 }
 
 int Deque::front() const
 {
-    if (sentinel->next == sentinel)
+    if (empty())
     {
         std::cout << "Cannot get front: deque is empty" << std::endl;
         return -1;
     }
-    return sentinel->next->arr[0];
+
+    int frontValueIndex = *startIt.current;
+    int frontValue = startIt.node->arr[frontValueIndex];
+    return frontValue;
 }
 
 int Deque::back() const
 {
-    if (sentinel->prev == sentinel)
+    if (empty())
     {
         std::cout << "Cannot get back: deque is empty" << std::endl;
         return -1;
     }
-    return sentinel->prev->arr[CHUNK_SIZE - 1];
+
+    int endValueIndex = *endIt.current;
+    if (endValueIndex == 0)
+    {
+        const Node* prevNode = endIt.node->prev;
+        int endValue = prevNode->arr[CHUNK_SIZE - 1];
+        return endValue;
+    }
+
+    int endValue = endIt.node->arr[endValueIndex - 1];
+    return endValue;
 }
 
 // TO DO 7
@@ -81,14 +146,24 @@ bool Deque::empty() const
 
 int Deque::size() const
 {
-    int length = 0;
+    int size = 0;
+    if (empty())
+    {
+        return size;
+    }
     Node *temp = sentinel->next;
     while (temp != sentinel)
     {
-        length += CHUNK_SIZE;
+        for (int i = 0; i < CHUNK_SIZE; i++)
+        {
+            if (temp->arr[i] != 0)
+            {
+                size++;
+            }
+        }
         temp = temp->next;
     }
-    return length;
+    return size;
 }
 
 // TO DO 8
