@@ -197,7 +197,7 @@ void Deque::pop_front()
 // TO DO 9
 void Deque::print_deque() const
 {
-    if (empty)
+    if (empty())
     {
         std::cout << "[]" << std::endl;
         return;
