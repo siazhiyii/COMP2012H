@@ -181,7 +181,7 @@ void Deque::push_back(int val)
 {
     Node *lastNode = sentinel->prev;
     int arr_pos = -1;
-    for (int i = CHUNK_SIZE - 1; lastNode->arr[i] == 0; i--)
+    for (int i = CHUNK_SIZE - 1; lastNode->arr[i] == 0 && i > -1; i--)
     {
         arr_pos = i;
     }
@@ -193,11 +193,9 @@ void Deque::push_back(int val)
         newNode->next = sentinel;
         lastNode->next = newNode;
         sentinel->prev = newNode;
+        return;
     }
-    else
-    {
-        lastNode->arr[arr_pos] = val;
-    }
+    lastNode->arr[arr_pos] = val;
     return;
 }
 
