@@ -33,6 +33,7 @@ class Deque {
         void pop_front();
 
         void print_deque() const;
+        void print_deque2() const;
 
         void insert(const Iterator& pos, int val);
         void erase(const Iterator& pos);

@@ -9,10 +9,20 @@ Iterator::Iterator(Node *node, bool from_first)
     if (from_first)
     {
         current = &node->arr[0];
+        return;
     }
     else
     {
-        current = &node->arr[CHUNK_SIZE - 1];
+        for (int i = CHUNK_SIZE - 1; i > 0; i--)
+        {
+            if (&node->arr[i] != 0)
+            {
+                current = &node->arr[i];
+                return;
+            }
+        }
+        current = &node->arr[0];
+        return;
     }
 }
 
@@ -30,7 +40,7 @@ const int *Iterator::last() const
 // TO DO 3
 bool Iterator::equal(const Iterator &other) const
 {
-    return (this->node == other.node) && (this->current == other.current);
+    return (node == other.node) && (current == other.current);
 }
 
 int *Iterator::curr() const
