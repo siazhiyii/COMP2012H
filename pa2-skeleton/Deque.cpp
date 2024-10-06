@@ -3,6 +3,7 @@
 #include "Deque.h"
 // remove
 // #include "Iterator.cpp"
+// using namespace std;
 
 // TO DO 5
 Deque::Deque()
@@ -179,6 +180,10 @@ int Deque::size() const
 // TO DO 8
 void Deque::push_back(int val)
 {
+    if (val == 0)
+    {
+        return;
+    }
     Node *lastNode = sentinel->prev;
     int arr_pos = -1;
     int i = CHUNK_SIZE - 1;
@@ -293,7 +298,7 @@ void Deque::insert(const Iterator &pos, int val)
         return;
     }
 
-    int tempValue;
+    int tempValue = 0;
 
     if (!(pos.equal(end())))
     {
@@ -305,7 +310,11 @@ void Deque::insert(const Iterator &pos, int val)
     {
         *pos.curr() = val;
     }
-    this->push_back(tempValue);
+
+    if (tempValue != 0)
+    {
+        this->push_back(tempValue);
+    }
 }
 
 void Deque::erase(const Iterator &pos)
@@ -410,11 +419,19 @@ void Deque::load_deque(const char *filename)
 // int main()
 // {
 //     Deque deque;
+
 //     deque.push_back(10);
-//     deque.push_back(20);
-//     deque.push_back(30);
-//     deque.push_back(40);
-//     deque.print_deque();
-//     deque.erase(deque.begin().next().next().next());
-//     deque.print_deque();
+//     deque.push_back(15);
+//     deque.push_back(25);
+
+//     cout << "The deque now is: ";
+//     deque.print_deque2();
+
+//     deque.insert(deque.begin(), 5);
+//     cout << "The deque now is: ";
+//     deque.print_deque2();
+
+//     deque.insert(deque.end().prev(), 20);
+//     cout << "The deque now is: ";
+//     deque.print_deque2();
 // }
