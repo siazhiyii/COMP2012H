@@ -64,7 +64,25 @@ bool hasItem(const Kiosk* kiosk, const Item &item)
 */
 void removeItem(Kiosk* kiosk, const Item &item)
 {
-    // TODO
+    if (!hasItem(kiosk, item))
+    {
+        return;
+    }
+
+    Item* newItems = new Item[kiosk->numItems - 1];
+    int newIndex = 0;
+
+    for (int i = 0; i < kiosk->numItems; i++)
+    {
+        if (compareItems(kiosk->items[i], item) != 0)
+        {
+            newItems[newIndex++] = kiosk->items[i];
+        }
+    }
+
+    delete[] kiosk->items;
+    kiosk->items = newItems;
+    kiosk->numItems--;
 }
 
 /**
@@ -74,6 +92,41 @@ void removeItem(Kiosk* kiosk, const Item &item)
 void sort(Kiosk* kiosk)
 {
     // TODO
+    bool sorted;
+    do
+    {
+        sorted = true;
+        for (int i = 0; i < (kiosk->numItems - 1); i++ )
+        {
+            int value = compareItems(kiosk->items[i], kiosk->items[i+1]);
+            if (value < 0)
+            {
+                continue;
+            }
+            else if (value > 0)
+            {
+                Item tempKiosk = kiosk->items[i+1];
+                kiosk->items[i+1] = kiosk->items[i];
+                kiosk->items[i] = tempKiosk;
+                sorted = false;
+            }
+            else
+            {
+                if (kiosk->items[i].name > kiosk->items[i+1].name)
+                {
+                    Item tempKiosk = kiosk->items[i+1];
+                    kiosk->items[i+1] = kiosk->items[i];
+                    kiosk->items[i] = tempKiosk;
+                    sorted = false;
+                }
+                else 
+                {
+                    continue;
+                }
+            }
+        }
+    }
+    while (!sorted);
 }
 
 /**
