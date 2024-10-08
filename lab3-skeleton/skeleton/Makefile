@@ -12,7 +12,8 @@ all: kioskArray kioskLinkedList	# TODO: Modify this so that you can compile kios
 kioskArray: $(OBJS) kioskArray.o # TODO: Compile kioskLinkedList, either in a separate rule or by utilizing pattern rule
 	g++ $(CPPFLAGS) -o $@ $^
 
-
+kioskLinkedList: $(OBJS) kioskLinkedList.o # TODO: Compile kioskLinkedList, either in a separate rule or by utilizing pattern rule
+	g++ $(CPPFLAGS) -o $@ $^
 
 # To include the .d dependency files
 -include $(DEPS)
