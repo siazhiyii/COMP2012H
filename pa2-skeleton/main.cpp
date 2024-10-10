@@ -212,9 +212,9 @@ int main() {
     test_empty_size();
     test_pop_back();
     test_pop_front();
-    // test_insert();
-    // test_erase();
-    // test_store_load();
+    test_insert();
+    test_erase();
+    test_store_load();
 
     return 0;
 }

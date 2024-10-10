@@ -39,7 +39,7 @@ Iterator Deque::begin() const
     {
         return startIt;
     }
-    Iterator beginIt;
+    // Iterator beginIt;
     Node *firstNode = sentinel->next;
     while (firstNode != sentinel)
     {
@@ -47,9 +47,11 @@ Iterator Deque::begin() const
         {
             if (firstNode->arr[i] != 0)
             {
-                beginIt.current = &firstNode->arr[i];
-                beginIt.node = firstNode;
+                Iterator beginIt(firstNode, true);
                 return beginIt;
+                // beginIt.current = &firstNode->arr[i];
+                // beginIt.node = firstNode;
+                // return beginIt;
             }
         }
         firstNode = firstNode->next;
@@ -63,7 +65,7 @@ Iterator Deque::end() const
     {
         return endIt;
     }
-    Iterator lastIt;
+    // Iterator lastIt;
     Node *lastNode = sentinel->prev;
     while (lastNode != sentinel)
     {
@@ -71,38 +73,40 @@ Iterator Deque::end() const
         {
             if (lastNode->arr[i] != 0)
             {
-                if (i == CHUNK_SIZE - 1)
-                {
-                    if (lastNode->next == sentinel)
-                    {
-                        Node *newNode = new Node();
-                        lastIt.current = &newNode->arr[0];
-                        lastIt.node = newNode;
-                        newNode->next = sentinel;
-                        newNode->prev = lastNode;
-                        lastNode->next = newNode;
-                        sentinel->prev = newNode;
-                        return lastIt;
-                    }
-                    else
-                    {
-                        lastNode = lastNode->next;
-                        lastIt.current = &lastNode->arr[0];
-                        lastIt.node = lastNode;
-                        return lastIt;
-                    }
-                }
-                else
-                {
-                    lastIt.current = &lastNode->arr[i + 1];
-                    lastIt.node = lastNode;
-                    return lastIt;
-                }
+                Iterator lastIt(lastNode, false);
+                return lastIt.next();
+                // if (i == CHUNK_SIZE - 1)
+                // {
+                //     if (lastNode->next == sentinel)
+                //     {
+                //         Node *newNode = new Node();
+                //         lastIt.current = &newNode->arr[0];
+                //         lastIt.node = newNode;
+                //         newNode->next = sentinel;
+                //         newNode->prev = lastNode;
+                //         lastNode->next = newNode;
+                //         sentinel->prev = newNode;
+                //         return lastIt;
+                //     }
+                //     else
+                //     {
+                //         lastNode = lastNode->next;
+                //         lastIt.current = &lastNode->arr[0];
+                //         lastIt.node = lastNode;
+                //         return lastIt;
+                //     }
+                // }
+                // else
+                // {
+                //     lastIt.current = &lastNode->arr[i + 1];
+                //     lastIt.node = lastNode;
+                //     return lastIt;
+                // }
             }
         }
         lastNode = lastNode->prev;
     }
-    return lastIt;
+    return endIt;
 }
 
 int Deque::front() const
@@ -123,16 +127,12 @@ int Deque::back() const
         return -1;
     }
 
-    int *endValueIndex = end().current;
-    // std::cout << "endValueIndex: " << endValueIndex << std::endl;
-    if (endValueIndex == &end().node->arr[0])
-    {
-        // remove
-        //  std::cout << "endValueIndex: " << endValueIndex << std::endl;
-        //  std::cout << "end().node->prev: " << end().node->prev << std::endl;
-        const Node *prevNode = end().node->prev;
-        return prevNode->arr[CHUNK_SIZE - 1];
-    }
+    // int *endValueIndex = end().curr();
+    // if (endValueIndex == &end().node->arr[0])
+    // {
+    //     const Node *prevNode = end().node->prev;
+    //     return prevNode->arr[CHUNK_SIZE - 1];
+    // }
     return *end().prev().curr();
 }
 

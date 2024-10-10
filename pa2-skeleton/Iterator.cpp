@@ -8,14 +8,20 @@ Iterator::Iterator(Node *node, bool from_first)
     this->node = node;
     if (from_first)
     {
-        current = &node->arr[0];
-        return;
+        for (int i = 0; i < CHUNK_SIZE; i++)
+        {
+            if (node->arr[i] != 0)
+            {
+                current = &node->arr[i];
+                return;
+            }
+        }
     }
     else
     {
-        for (int i = CHUNK_SIZE - 1; i > 0; i--)
+        for (int i = CHUNK_SIZE - 1; i > -1; i--)
         {
-            if (&node->arr[i] != 0)
+            if (node->arr[i] != 0)
             {
                 current = &node->arr[i];
                 return;
@@ -29,12 +35,19 @@ Iterator::Iterator(Node *node, bool from_first)
 // TO DO 2
 const int *Iterator::first() const
 {
-    return &node->arr[0];
+    return this->current;
 }
 
 const int *Iterator::last() const
 {
-    return &node->arr[CHUNK_SIZE];
+    if (current == &node->arr[CHUNK_SIZE - 1])
+    {
+        return &this->node->next->arr[0];
+    }
+    Iterator iterator = *this;
+    iterator.current++;
+    int* address = iterator.curr();
+    return address;
 }
 
 // TO DO 3
