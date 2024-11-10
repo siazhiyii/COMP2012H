@@ -1,0 +1,6 @@
+Test Case 17: Part II - Testing copy constructor of Table
+--------------------------------------------------
+Table: Courses
++----------------------------------------------------------------+
+| Name | Room | Num. Of Enrollment | Passing Rate | Blended Mode |
++----------------------------------------------------------------+

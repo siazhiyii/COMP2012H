@@ -1,0 +1,5 @@
+Test Case 2: Part I - Testing copy constructor of Column
+--------------------------------------------------
+Key: My Column
+Default value: 10
+Size: 0

@@ -1,0 +1,7 @@
+Test Case 11: Part I - Testing Column::operator of boolean operations
+--------------------------------------------------
+Key: Temp Column
+Default value: 0
+Size: 10
+Contents in the column: 
+0 0 0 0 0 1 1 0 0 0 

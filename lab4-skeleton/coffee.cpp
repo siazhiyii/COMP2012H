@@ -12,6 +12,10 @@ using namespace std;
    =================================================== */ 
 Coffee::Coffee(Bean *bean, Milk *milk1, Milk *milk2)
 {
+    this->bean = bean;
+    this->milk1 = milk1;
+    this->milk2 = milk2;
+
     // Finish constructing with printing.
     cout << "Coffee is Constructed!" << endl;
 }
@@ -25,10 +29,13 @@ Coffee::Coffee(Bean *bean, Milk *milk1, Milk *milk2)
    =================================================== */ 
 Coffee::Coffee(const Coffee &other)
 {
+    this->bean = (other.bean != nullptr) ? new Bean(*other.bean) : nullptr;
+    this->milk1 = (other.milk1 != nullptr) ? new Milk(*other.milk1) : nullptr;
+    this->milk2 = (other.milk2 != nullptr) ? new Milk(*other.milk2) : nullptr;
+
     // Finish constructing with printing.
     cout << "Coffee is Copied!" << endl;
 }
-
 
 /* ===================================================
     TODO: Complete the destructor.
@@ -36,6 +43,9 @@ Coffee::Coffee(const Coffee &other)
    =================================================== */ 
 Coffee::~Coffee()
 {
+    delete bean;
+    delete milk1;
+    delete milk2;
     // Finish constructing with printing.
     cout << "Coffee is Destructed." << endl;
 }

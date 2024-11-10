@@ -1,0 +1,4 @@
+Test Case 7: Part I - Testing Column::operator[] of index
+--------------------------------------------------
+Contents in the column: 
+0 3 6 500 12 15 18 1000 24 27 

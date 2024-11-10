@@ -1,0 +1,4 @@
+Test Case 6: Part I - Testing Column::operator[] const of index
+--------------------------------------------------
+Contents in the column: 
+0 3 6 9 12 15 18 21 24 27 

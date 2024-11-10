@@ -1,0 +1,5 @@
+Test Case 1: Part I - Testing default constructor of Column
+--------------------------------------------------
+Key: My Column
+Default value: 2
+Size: 0

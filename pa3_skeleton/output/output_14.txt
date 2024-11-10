@@ -1,0 +1,6 @@
+Test Case 14: Part II - Testing Table::setupColumn
+--------------------------------------------------
+Table: Courses
++----------------------------------------------------------------+
+| Name | Room | Num. Of Enrollment | Passing Rate | Blended Mode |
++----------------------------------------------------------------+

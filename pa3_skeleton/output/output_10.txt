@@ -1,0 +1,7 @@
+Test Case 10: Part I - Testing Column::concat
+--------------------------------------------------
+Key: My Column 1
+Default value: 2012
+Size: 20
+Contents in the column: 
+10 11 12 13 14 15 16 17 18 19 -10 -9 -8 -7 -6 -5 -4 -3 -2 -1 

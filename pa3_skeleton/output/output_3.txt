@@ -1,0 +1,5 @@
+Test Case 3: Part I - Testing Column::operator=
+--------------------------------------------------
+Key: My Column
+Default value: 10
+Size: 0

@@ -1,0 +1,6 @@
+Test Case 15: Part II - Testing Table::removeColumn
+--------------------------------------------------
+Table: Courses
++-------------------------------------------------+
+| Name | Room | Num. Of Enrollment | Blended Mode |
++-------------------------------------------------+
