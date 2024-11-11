@@ -146,9 +146,14 @@ int main() {
         crossedTable = crossedTable[crossedTable.get<string>("Grades.Student ID") == crossedTable.get<string>("Courses_Students.Students.Student ID")
         && crossedTable.get<string>("Grades.Offering") == crossedTable.get<string>("Courses_Students.Courses.Name")];
 
-        crossedTable.renameColumn({"Courses_Students.Courses.Name", "Courses_Students.Courses.Passing Rate", "Courses_Students.Students.Name", "Grades.Grade"}, {"Course Name", "Passing Rate", "Student Name", "Grade"})
-        .select({"Course Name", "Passing Rate", "Student Name", "Grade"}).sortBy("Grade").print();
-
+        // crossedTable.renameColumn({"Courses_Students.Courses.Name", "Courses_Students.Courses.Passing Rate", "Courses_Students.Students.Name", "Grades.Grade"}, {"Course Name", "Passing Rate", "Student Name", "Grade"})
+        // .select({"Course Name", "Passing Rate", "Student Name", "Grade"}).sortBy("Grade").print();
+        crossedTable = crossedTable.renameColumn({"Courses_Students.Courses.Name", "Courses_Students.Courses.Passing Rate", "Courses_Students.Students.Name", "Grades.Grade"}, {"Course Name", "Passing Rate", "Student Name", "Grade"});
+        crossedTable.print();
+        crossedTable = crossedTable.select({"Course Name", "Passing Rate", "Student Name", "Grade"});
+        crossedTable.print();
+        crossedTable= crossedTable.sortBy("Grade");
+        crossedTable.print();
 
     }
 

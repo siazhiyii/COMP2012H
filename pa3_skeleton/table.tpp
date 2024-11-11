@@ -3,6 +3,31 @@ using namespace std;
 
 // helper functions
 
+void Table::setupColumnsBasedOnOrder(Table &differenceTable, const std::string *colKeyList, int sizeColKeyList) const
+{
+
+    for (int i = 0; i < getTotalNumCols(); ++i)
+    {
+        std::string key = colKeyList[i];
+        if (this->getCol<std::string>(key) != nullptr)
+        {
+            differenceTable.setupColumn<std::string>(key, this->getCol<std::string>(key)->get_default_value());
+        }
+        else if (this->getCol<int>(key) != nullptr)
+        {
+            differenceTable.setupColumn<int>(key, this->getCol<int>(key)->get_default_value());
+        }
+        else if (this->getCol<double>(key) != nullptr)
+        {
+            differenceTable.setupColumn<double>(key, this->getCol<double>(key)->get_default_value());
+        }
+        else if (this->getCol<bool>(key) != nullptr)
+        {
+            differenceTable.setupColumn<bool>(key, this->getCol<bool>(key)->get_default_value());
+        }
+    }
+}
+
 int Table::getNumRecords() const
 {
     return num_rows;
@@ -11,56 +36,6 @@ int Table::getNumRecords() const
 void Table::setNumRecords(int numRecords)
 {
     num_rows = numRecords;
-}
-
-// num cols is increased in the code before this function is called
-std::string *Table::addColKey(const std::string &key)
-{
-    int numCols = getTotalNumCols();
-    std::string *newColKeyList = new std::string[numCols];
-
-    for (int i = 0; i < numCols - 1; ++i)
-    {
-        newColKeyList[i] = colKeyList[i];
-    }
-    newColKeyList[numCols - 1] = key;
-
-    delete[] colKeyList;
-    return newColKeyList;
-}
-
-// num cols is decreased in the code before this function is called
-std::string *Table::removeColKey(const std::string &key)
-{
-    int numCols = getTotalNumCols();
-    int index = -1;
-    for (int i = 0; i < numCols + 1; ++i)
-    {
-        if (colKeyList[i] == key)
-        {
-            index = i; // get the index of the key to remove
-            break;
-        }
-    }
-
-    if (index == -1)
-    {
-        // key doesn't exist
-        return colKeyList;
-    }
-
-    // create a new array with one less slot
-    std::string *newColKeyList = new std::string[numCols];
-    for (int i = 0, j = 0; i < numCols + 1; ++i)
-    {
-        if (i != index)
-        {
-            newColKeyList[j++] = colKeyList[i];
-        }
-    }
-
-    delete[] colKeyList;
-    return newColKeyList;
 }
 
 template <typename T>
@@ -72,12 +47,12 @@ bool Table::removeColTyped(std::string key)
 
     for (int i = 0; i < numCols; ++i)
     {
-        if (cols[i]->key() == key) // find matching key
-        {
+        if (cols[i]->key() == key)
+        { // find matching key
             // remove col and reduce num col
             delete cols[i];
-            for (int j = i; j < numCols - 1; ++j) // shift
-            {
+            for (int j = i; j < numCols - 1; ++j)
+            { // shift
                 cols[j] = cols[j + 1];
             }
             --numCols;
@@ -92,9 +67,33 @@ bool Table::removeColTyped(std::string key)
             cols = newCols;
 
             // remove the key from colKeyList
-            std::string *newColKeyList = removeColKey(key);
-            delete[] colKeyList;
-            colKeyList = newColKeyList;
+            int totalCols = getTotalNumCols();
+            int index = -1;
+            for (int m = 0; m < totalCols + 1; ++m)
+            {
+                if (colKeyList[m] == key)
+                {
+                    index = m; // get the index of the key to remove
+                    break;
+                }
+            }
+
+            if (index != -1)
+            {
+                // create a new array with one less slot
+                std::string *newColKeyList = new std::string[totalCols];
+                for (int m = 0, n = 0; m < totalCols + 1; ++m)
+                {
+                    if (m != index)
+                    {
+                        newColKeyList[n++] = colKeyList[m];
+                    }
+                }
+
+                delete[] colKeyList;
+                colKeyList = newColKeyList;
+            }
+
             return true;
         }
     }
@@ -269,10 +268,22 @@ void Table::setupColumn(std::string key, const T &default_value)
     cols = newCols;
     ++numCols;
 
-    std::string *newColKeyList = addColKey(key);
-    delete[] colKeyList;
+    int totalCols = getTotalNumCols();
+    std::string *newColKeyList = new std::string[totalCols];
+
+    if (colKeyList != nullptr)
+    {
+        for (int i = 0; i < totalCols - 1; ++i)
+        {
+            newColKeyList[i] = colKeyList[i];
+        }
+        delete[] colKeyList;
+    }
+    newColKeyList[totalCols - 1] = key;
+
     colKeyList = newColKeyList;
 }
+
 
 void Table::removeColumn(std::string key)
 {
@@ -487,6 +498,12 @@ Table::Table(const Table &other)
 
 Table::~Table()
 {
+    for (int i = 0; i < num_str_cols; ++i)
+    {
+        delete str_cols[i];
+    }
+    delete[] str_cols;
+
     for (int i = 0; i < num_int_cols; ++i)
     {
         delete int_cols[i];
@@ -505,12 +522,9 @@ Table::~Table()
     }
     delete[] bool_cols;
 
-    for (int i = 0; i < num_str_cols; ++i)
-    {
-        delete str_cols[i];
-    }
-    delete[] str_cols;
+    delete[] colKeyList;
 }
+
 
 template <typename T>
 void Table::insertEntryForColumn(std::string key, const T &field)
@@ -587,7 +601,6 @@ void Table::updateRecords(const Column<bool> &filter, std::string key, const T &
 
 void Table::removeRecords(const Column<bool> &filter)
 {
-    // Ensure the filter size matches the number of records
     if (filter.size() != getNumRecords())
     {
         throw std::invalid_argument("Filter size does not match the number of records in the table.");
@@ -604,7 +617,6 @@ void Table::removeRecords(const Column<bool> &filter)
         }
     }
 
-    // Remove entries in reverse order to avoid index shifting issues
     for (int i = count - 1; i >= 0; --i)
     {
         int index = indicesToRemove[i];
@@ -634,50 +646,6 @@ void Table::removeRecords(const Column<bool> &filter)
     delete[] indicesToRemove;
 }
 
-// void Table::removeRecords(const Column<bool> &filter)
-// {
-//     // Ensure the filter size matches the number of records
-//     if (filter.size() != getNumRecords())
-//     {
-//         throw std::invalid_argument("Filter size does not match the number of records in the table.");
-//     }
-
-//     int toBeRemoved = -1;
-//     for (int i = 0; i < filter.size(); ++i)
-//     {
-//         if (!filter[i])
-//         {
-//             if (toBeRemoved == -1)
-//             {
-//                 toBeRemoved = i;
-
-//                 for (int j = 0; j < num_str_cols; ++j)
-//                 {
-//                     str_cols[j]->removeEntry(i);
-//                 }
-
-//                 for (int j = 0; j < num_int_cols; ++j)
-//                 {
-//                     int_cols[j]->removeEntry(i);
-//                 }
-
-//                 for (int j = 0; j < num_double_cols; ++j)
-//                 {
-//                     double_cols[j]->removeEntry(i);
-//                 }
-
-//                 for (int j = 0; j < num_bool_cols; ++j)
-//                 {
-//                     bool_cols[j]->removeEntry(i);
-//                 }
-//             }
-
-//             num_rows--;
-//             toBeRemoved = -1;
-//         }
-//     }
-// }
-
 Table Table::operator[](const Column<bool> &filter) const
 {
     if (filter.size() != getNumRecords())
@@ -687,22 +655,24 @@ Table Table::operator[](const Column<bool> &filter) const
 
     Table newTable(this->name);
 
-    for (int i = 0; i < num_str_cols; ++i)
-    {
-        newTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_int_cols; ++i)
-    {
-        newTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_double_cols; ++i)
-    {
-        newTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_bool_cols; ++i)
-    {
-        newTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
-    }
+    setupColumnsBasedOnOrder(newTable, colKeyList, getTotalNumCols());
+
+    // for (int i = 0; i < num_str_cols; ++i)
+    // {
+    //     newTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_int_cols; ++i)
+    // {
+    //     newTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_double_cols; ++i)
+    // {
+    //     newTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_bool_cols; ++i)
+    // {
+    //     newTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
+    // }
 
     for (int i = 0; i < filter.size(); ++i)
     {
@@ -739,22 +709,24 @@ Table Table::limit(int numLimit) const
 
     Table newTable(this->name);
 
-    for (int i = 0; i < num_str_cols; ++i)
-    {
-        newTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_int_cols; ++i)
-    {
-        newTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_double_cols; ++i)
-    {
-        newTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_bool_cols; ++i)
-    {
-        newTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
-    }
+    setupColumnsBasedOnOrder(newTable, colKeyList, getTotalNumCols());
+
+    // for (int i = 0; i < num_str_cols; ++i)
+    // {
+    //     newTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_int_cols; ++i)
+    // {
+    //     newTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_double_cols; ++i)
+    // {
+    //     newTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_bool_cols; ++i)
+    // {
+    //     newTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
+    // }
 
     for (int i = 0; i < numLimit; ++i)
     {
@@ -789,22 +761,24 @@ Table Table::skip(int numSkip) const
 
     Table skippedTable(this->name);
 
-    for (int i = 0; i < num_str_cols; ++i)
-    {
-        skippedTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_int_cols; ++i)
-    {
-        skippedTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_double_cols; ++i)
-    {
-        skippedTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_bool_cols; ++i)
-    {
-        skippedTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
-    }
+    setupColumnsBasedOnOrder(skippedTable, colKeyList, getTotalNumCols());
+
+    // for (int i = 0; i < num_str_cols; ++i)
+    // {
+    //     skippedTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_int_cols; ++i)
+    // {
+    //     skippedTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_double_cols; ++i)
+    // {
+    //     skippedTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_bool_cols; ++i)
+    // {
+    //     skippedTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
+    // }
 
     for (int i = numSkip; i < num_rows; ++i)
     {
@@ -834,12 +808,10 @@ Table Table::select(const std::string (&selectKeys)[arrSize]) const
 {
     Table result(this->name);
 
-    // Set up the columns in the result table based on selectKeys
     for (int i = 0; i < arrSize; ++i)
     {
         const std::string &key = selectKeys[i];
 
-        // Check and set up string columns
         for (int j = 0; j < num_str_cols; ++j)
         {
             if (str_cols[j]->key() == key)
@@ -849,7 +821,6 @@ Table Table::select(const std::string (&selectKeys)[arrSize]) const
             }
         }
 
-        // Check and set up int columns
         for (int j = 0; j < num_int_cols; ++j)
         {
             if (int_cols[j]->key() == key)
@@ -859,7 +830,6 @@ Table Table::select(const std::string (&selectKeys)[arrSize]) const
             }
         }
 
-        // Check and set up bool columns
         for (int j = 0; j < num_bool_cols; ++j)
         {
             if (bool_cols[j]->key() == key)
@@ -869,7 +839,6 @@ Table Table::select(const std::string (&selectKeys)[arrSize]) const
             }
         }
 
-        // Check and set up double columns
         for (int j = 0; j < num_double_cols; ++j)
         {
             if (double_cols[j]->key() == key)
@@ -880,14 +849,12 @@ Table Table::select(const std::string (&selectKeys)[arrSize]) const
         }
     }
 
-    // Copy the data for the selected columns
     for (int i = 0; i < num_rows; ++i)
     {
         for (int j = 0; j < arrSize; ++j)
         {
             const std::string &key = selectKeys[j];
 
-            // Copy string column data
             for (int k = 0; k < num_str_cols; ++k)
             {
                 if (str_cols[k]->key() == key)
@@ -897,7 +864,6 @@ Table Table::select(const std::string (&selectKeys)[arrSize]) const
                 }
             }
 
-            // Copy int column data
             for (int k = 0; k < num_int_cols; ++k)
             {
                 if (int_cols[k]->key() == key)
@@ -917,7 +883,6 @@ Table Table::select(const std::string (&selectKeys)[arrSize]) const
                 }
             }
 
-            // Copy double column data
             for (int k = 0; k < num_double_cols; ++k)
             {
                 if (double_cols[k]->key() == key)
@@ -929,7 +894,6 @@ Table Table::select(const std::string (&selectKeys)[arrSize]) const
         }
     }
 
-    // Set the colKeyList of the result table to the selectKeys array
     result.colKeyList = new std::string[arrSize];
     for (int i = 0; i < arrSize; ++i)
     {
@@ -943,22 +907,24 @@ Table Table::alias(std::string newName) const
 {
     Table aliasedTable(newName);
 
-    for (int i = 0; i < num_str_cols; ++i)
-    {
-        aliasedTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_int_cols; ++i)
-    {
-        aliasedTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_double_cols; ++i)
-    {
-        aliasedTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_bool_cols; ++i)
-    {
-        aliasedTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
-    }
+    setupColumnsBasedOnOrder(aliasedTable, colKeyList, getTotalNumCols());
+
+    // for (int i = 0; i < num_str_cols; ++i)
+    // {
+    //     aliasedTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_int_cols; ++i)
+    // {
+    //     aliasedTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_double_cols; ++i)
+    // {
+    //     aliasedTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_bool_cols; ++i)
+    // {
+    //     aliasedTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
+    // }
 
     for (int i = 0; i < num_rows; ++i)
     {
@@ -988,7 +954,6 @@ Table Table::renameColumn(const std::string (&oriName)[arrSize], const std::stri
 {
     Table result(this->name);
 
-    // Create arrays for original and new names
     std::string *oriNames = new std::string[arrSize];
     std::string *newNames = new std::string[arrSize];
     for (int i = 0; i < arrSize; ++i)
@@ -997,7 +962,6 @@ Table Table::renameColumn(const std::string (&oriName)[arrSize], const std::stri
         newNames[i] = newName[i];
     }
 
-    // Set up columns in the result table with renamed keys
     for (int i = 0; i < num_str_cols; ++i)
     {
         std::string key = str_cols[i]->key();
@@ -1054,7 +1018,6 @@ Table Table::renameColumn(const std::string (&oriName)[arrSize], const std::stri
         result.setupColumn<double>(key, double_cols[i]->get_default_value());
     }
 
-    // Copy the data for the columns
     for (int i = 0; i < num_rows; ++i)
     {
         for (int j = 0; j < num_str_cols; ++j)
@@ -1114,7 +1077,6 @@ Table Table::renameColumn(const std::string (&oriName)[arrSize], const std::stri
         }
     }
 
-    // Set the colKeyList of the result table to the new names
     result.colKeyList = new std::string[getTotalNumCols()];
     for (int i = 0; i < getTotalNumCols(); ++i)
     {
@@ -1130,7 +1092,6 @@ Table Table::renameColumn(const std::string (&oriName)[arrSize], const std::stri
         result.colKeyList[i] = key;
     }
 
-    // Clean up
     delete[] oriNames;
     delete[] newNames;
 
@@ -1146,22 +1107,24 @@ Table Table::operator+(const Table &other) const
 
     Table concatenatedTable(this->name);
 
-    for (int i = 0; i < num_str_cols; ++i)
-    {
-        concatenatedTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_int_cols; ++i)
-    {
-        concatenatedTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_double_cols; ++i)
-    {
-        concatenatedTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_bool_cols; ++i)
-    {
-        concatenatedTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
-    }
+    setupColumnsBasedOnOrder(concatenatedTable, colKeyList, getTotalNumCols());
+
+    // for (int i = 0; i < num_str_cols; ++i)
+    // {
+    //     concatenatedTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_int_cols; ++i)
+    // {
+    //     concatenatedTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_double_cols; ++i)
+    // {
+    //     concatenatedTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_bool_cols; ++i)
+    // {
+    //     concatenatedTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
+    // }
 
     for (int i = 0; i < num_rows; ++i)
     {
@@ -1206,69 +1169,97 @@ Table Table::operator+(const Table &other) const
     return concatenatedTable;
 }
 
-Table Table::sortBy(std::string key, bool descending) const {
+bool Table::compare(int a, int b, const std::string &key, bool descending) const
+{
+    if (this->getCol<int>(key) != nullptr)
+    {
+        return descending ? (*this->getCol<int>(key))[a] > (*this->getCol<int>(key))[b]
+                          : (*this->getCol<int>(key))[a] <= (*this->getCol<int>(key))[b];
+    }
+    else if (this->getCol<double>(key) != nullptr)
+    {
+        return descending ? (*this->getCol<double>(key))[a] > (*this->getCol<double>(key))[b]
+                          : (*this->getCol<double>(key))[a] <= (*this->getCol<double>(key))[b];
+    }
+    else if (this->getCol<bool>(key) != nullptr)
+    {
+        return descending ? (*this->getCol<bool>(key))[a] > (*this->getCol<bool>(key))[b]
+                          : (*this->getCol<bool>(key))[a] <= (*this->getCol<bool>(key))[b];
+    }
+    else if (this->getCol<std::string>(key) != nullptr)
+    {
+        return descending ? (*this->getCol<std::string>(key))[a] > (*this->getCol<std::string>(key))[b]
+                          : (*this->getCol<std::string>(key))[a] <= (*this->getCol<std::string>(key))[b];
+    }
+    return false;
+}
+int Table::partition(int *indices, int low, int high, const std::string &key, bool descending) const
+{
+    int pivot = indices[high];
+    int i = low - 1;
+    for (int j = low; j < high; ++j)
+    {
+        if (compare(indices[j], pivot, key, descending))
+        {
+            ++i;
+            int temp = indices[i];
+            indices[i] = indices[j];
+            indices[j] = temp;
+        }
+    }
+    int temp = indices[i + 1];
+    indices[i + 1] = indices[high];
+    indices[high] = temp;
+    return i + 1;
+}
+
+void Table::quicksort(int *indices, int low, int high, const std::string &key, bool descending) const
+{
+    if (low < high)
+    {
+        int pi = partition(indices, low, high, key, descending);
+        quicksort(indices, low, pi - 1, key, descending);
+        quicksort(indices, pi + 1, high, key, descending);
+    }
+}
+Table Table::sortBy(std::string key, bool descending) const
+{
     if (this->getCol<int>(key) == nullptr && this->getCol<double>(key) == nullptr &&
-        this->getCol<bool>(key) == nullptr && this->getCol<std::string>(key) == nullptr) {
+        this->getCol<bool>(key) == nullptr && this->getCol<std::string>(key) == nullptr)
+    {
         return *this;
     }
 
-    Table sortedTable(this->name + "_sorted");
 
-    for (int i = 0; i < num_str_cols; ++i) {
-        sortedTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_int_cols; ++i) {
-        sortedTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_double_cols; ++i) {
-        sortedTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_bool_cols; ++i) {
-        sortedTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
-    }
+    Table sortedTable(this->name);
+
+    setupColumnsBasedOnOrder(sortedTable, colKeyList, getTotalNumCols());
 
     int *indices = new int[num_rows];
-    for (int i = 0; i < num_rows; ++i) {
+    for (int i = 0; i < num_rows; ++i)
+    {
         indices[i] = i;
     }
 
-    bool (*compare)(int, int) = this, key, descending -> bool {
-        if (this->getCol<int>(key) != nullptr) {
-            return descending ? (*this->getCol<int>(key))[a] > (*this->getCol<int>(key))[b]
-                              : (*this->getCol<int>(key))[a] < (*this->getCol<int>(key))[b];
-        } else if (this->getCol<double>(key) != nullptr) {
-            return descending ? (*this->getCol<double>(key))[a] > (*this->getCol<double>(key))[b]
-                              : (*this->getCol<double>(key))[a] < (*this->getCol<double>(key))[b];
-        } else if (this->getCol<bool>(key) != nullptr) {
-            return descending ? (*this->getCol<bool>(key))[a] > (*this->getCol<bool>(key))[b]
-                              : (*this->getCol<bool>(key))[a] < (*this->getCol<bool>(key))[b];
-        } else if (this->getCol<std::string>(key) != nullptr) {
-            return descending ? (*this->getCol<std::string>(key))[a] > (*this->getCol<std::string>(key))[b]
-                              : (*this->getCol<std::string>(key))[a] < (*this->getCol<std::string>(key))[b];
-        }
-        return false;
-    };
+    quicksort(indices, 0, num_rows - 1, key, descending);
 
-    for (int i = 0; i < num_rows - 1; ++i) {
-        for (int j = 0; j < num_rows - i - 1; ++j) {
-            if (compare(indices[j], indices[j + 1])) {
-                std::swap(indices[j], indices[j + 1]);
-            }
-        }
-    }
-
-    for (int i = 0; i < num_rows; ++i) {
+    for (int i = 0; i < num_rows; ++i)
+    {
         int index = indices[i];
-        for (int j = 0; j < num_str_cols; ++j) {
+        for (int j = 0; j < num_str_cols; ++j)
+        {
             sortedTable.insertEntryForColumn<std::string>(str_cols[j]->key(), (*str_cols[j])[index]);
         }
-        for (int j = 0; j < num_int_cols; ++j) {
+        for (int j = 0; j < num_int_cols; ++j)
+        {
             sortedTable.insertEntryForColumn<int>(int_cols[j]->key(), (*int_cols[j])[index]);
         }
-        for (int j = 0; j < num_double_cols; ++j) {
+        for (int j = 0; j < num_double_cols; ++j)
+        {
             sortedTable.insertEntryForColumn<double>(double_cols[j]->key(), (*double_cols[j])[index]);
         }
-        for (int j = 0; j < num_bool_cols; ++j) {
+        for (int j = 0; j < num_bool_cols; ++j)
+        {
             sortedTable.insertEntryForColumn<bool>(bool_cols[j]->key(), (*bool_cols[j])[index]);
         }
     }
@@ -1286,22 +1277,24 @@ Table Table::operator-(const Table &other) const
 
     Table differenceTable(this->name);
 
-    for (int i = 0; i < num_str_cols; ++i)
-    {
-        differenceTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_int_cols; ++i)
-    {
-        differenceTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_double_cols; ++i)
-    {
-        differenceTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
-    }
-    for (int i = 0; i < num_bool_cols; ++i)
-    {
-        differenceTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
-    }
+    setupColumnsBasedOnOrder(differenceTable, colKeyList, getTotalNumCols());
+
+    // for (int i = 0; i < num_str_cols; ++i)
+    // {
+    //     differenceTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_int_cols; ++i)
+    // {
+    //     differenceTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_double_cols; ++i)
+    // {
+    //     differenceTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
+    // }
+    // for (int i = 0; i < num_bool_cols; ++i)
+    // {
+    //     differenceTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
+    // }
 
     for (int i = 0; i < num_rows; ++i)
     {
@@ -1371,102 +1364,6 @@ Table Table::operator-(const Table &other) const
     return differenceTable;
 }
 
-// Table Table::operator-(const Table &other) const
-// {
-//     if (!this->checkCompatible(other))
-//     {
-//         throw std::invalid_argument("Table not compatible during difference!");
-//     }
-
-//     Table differenceTable(this->name);
-
-//     for (int i = 0; i < num_str_cols; ++i)
-//     {
-//         differenceTable.setupColumn<std::string>(str_cols[i]->key(), str_cols[i]->get_default_value());
-//     }
-//     for (int i = 0; i < num_int_cols; ++i)
-//     {
-//         differenceTable.setupColumn<int>(int_cols[i]->key(), int_cols[i]->get_default_value());
-//     }
-//     for (int i = 0; i < num_double_cols; ++i)
-//     {
-//         differenceTable.setupColumn<double>(double_cols[i]->key(), double_cols[i]->get_default_value());
-//     }
-//     for (int i = 0; i < num_bool_cols; ++i)
-//     {
-//         differenceTable.setupColumn<bool>(bool_cols[i]->key(), bool_cols[i]->get_default_value());
-//     }
-
-//     bool (*recordExistsInOther)(int) = [&](int rowIndex)
-//     {
-//         for (int i = 0; i < other.num_rows; ++i)
-//         {
-//             bool match = true;
-//             for (int j = 0; j < num_str_cols; ++j)
-//             {
-//                 if ((*str_cols[j])[rowIndex] != (*other.str_cols[j])[i])
-//                 {
-//                     match = false;
-//                     break;
-//                 }
-//             }
-//             for (int j = 0; j < num_int_cols; ++j)
-//             {
-//                 if ((*int_cols[j])[rowIndex] != (*other.int_cols[j])[i])
-//                 {
-//                     match = false;
-//                     break;
-//                 }
-//             }
-//             for (int j = 0; j < num_double_cols; ++j)
-//             {
-//                 if ((*double_cols[j])[rowIndex] != (*other.double_cols[j])[i])
-//                 {
-//                     match = false;
-//                     break;
-//                 }
-//             }
-//             for (int j = 0; j < num_bool_cols; ++j)
-//             {
-//                 if ((*bool_cols[j])[rowIndex] != (*other.bool_cols[j])[i])
-//                 {
-//                     match = false;
-//                     break;
-//                 }
-//             }
-//             if (match)
-//             {
-//                 return true;
-//             }
-//         }
-//         return false;
-//     };
-
-//     for (int i = 0; i < num_rows; ++i)
-//     {
-//         if (!recordExistsInOther(i))
-//         {
-//             for (int j = 0; j < num_str_cols; ++j)
-//             {
-//                 differenceTable.insertEntryForColumn<std::string>(str_cols[j]->key(), (*str_cols[j])[i]);
-//             }
-//             for (int j = 0; j < num_int_cols; ++j)
-//             {
-//                 differenceTable.insertEntryForColumn<int>(int_cols[j]->key(), (*int_cols[j])[i]);
-//             }
-//             for (int j = 0; j < num_double_cols; ++j)
-//             {
-//                 differenceTable.insertEntryForColumn<double>(double_cols[j]->key(), (*double_cols[j])[i]);
-//             }
-//             for (int j = 0; j < num_bool_cols; ++j)
-//             {
-//                 differenceTable.insertEntryForColumn<bool>(bool_cols[j]->key(), (*bool_cols[j])[i]);
-//             }
-//         }
-//     }
-
-//     return differenceTable;
-// }
 Table Table::operator*(const Table &other) const
 {
     if (this->name == other.name)
@@ -1476,6 +1373,8 @@ Table Table::operator*(const Table &other) const
 
     std::string newTableName = this->name + "_" + other.name;
     Table productTable(newTableName);
+
+    // setupColumnsBasedOnOrder(productTable, colKeyList, getTotalNumCols());
 
     for (int i = 0; i < num_str_cols; ++i)
     {

@@ -641,5 +641,38 @@ int main()
 
             (table2 + table).print();
         }
+        else if (caseID == 99)
+        {
+            string name = "TEST TEST TEST";
+            cout << IDX << caseID << NAME << name << endl << LINE << endl;
+
+            Table table("TESTER");
+            cout << LINE << endl;
+            table.print();
+            cout << "empty table printed" << endl;
+
+            table.setupColumn("string", (string) "N/A");
+            table.setupColumn("bool", true);
+            table.setupColumn("double", 0.123);
+            table.setupColumn("int", 0);
+            cout << LINE << endl;
+            table.print();
+            cout << "table with 4 columns printed" << endl;
+
+            table.insertRecord({"string", "bool", "double", "int"}, "COMP2012H", false, 100.0, 28);
+            table.insertRecord({"string", "bool", "double", "int"}, "COMP1021", true, 90.5, 1200);
+            table.insertRecord({"string", "bool", "double", "int"}, "COMP3111", false, 89.3, 181);
+
+            cout << LINE << endl;
+            table.print();
+
+            table.updateRecords(table.get<string>("string") == "COMP1021", "int", 10000);
+            table.updateRecords(table.get<double>("double") < 90.0, "bool", false);
+            table.updateRecords(table.get<double>("double") > 90.0, "bool", true);
+            table.print();
+
+            table.sortBy("int").print();
+            table.sortBy("string").print();
+        }
     }
 }

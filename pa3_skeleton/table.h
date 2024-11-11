@@ -33,9 +33,12 @@ private:
 
     int getNumRecords() const;
 
-    std::string* addColKey(const std::string& key);
+    void setupColumnsBasedOnOrder(Table &differenceTable, const std::string *colKeyList, int sizeColKeyList) const;
 
-    std::string* removeColKey(const std::string& key);
+    bool compare(int a, int b, const std::string& key, bool descending) const;
+
+    void quicksort(int* indices, int low, int high, const std::string& key, bool descending) const;
+    int partition(int* indices, int low, int high, const std::string& key, bool descending) const;
 
     void setNumRecords(int numRecords);
 
