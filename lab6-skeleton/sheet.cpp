@@ -17,22 +17,21 @@
  */
 #include "sheet.h"
 
-
-Sheet::Sheet(int id) {
+Sheet::Sheet(int id)
+{
     string prefix = "Sheet_" + to_string(id) + " Create: ";
-    cout << prefix << "Hello!" << endl; 
+    cout << prefix << "Hello!" << endl;
 
     this->id = id;
     history_stack.push_back("The sheet is set as an empty sheet.");
     current_status = prev(history_stack.end());
 }
 
-
-Sheet::~Sheet() {
+Sheet::~Sheet()
+{
     string prefix = "Sheet_" + to_string(id) + " Close: ";
     cout << prefix << "Goodbye" << endl;
 }
-
 
 /**
  * Update the sheet with a update message.
@@ -41,13 +40,20 @@ Sheet::~Sheet() {
  * TODO: Finish the code.
  * Remember: There is no way to redo after an new update has performed.
  */
-void Sheet::update(History updateMessage) {
+void Sheet::update(History updateMessage)
+{
     string prefix = "Sheet_" + to_string(id) + " Update: ";
-    cout << prefix << updateMessage << endl; 
+    cout << prefix << updateMessage << endl;
 
     // =========== TODO =================
-    
 
+    if (current_status != history_stack.end())
+    {
+        ++current_status;
+        history_stack.erase(current_status, history_stack.end());
+    }
+    history_stack.push_back(updateMessage);
+    current_status = std::prev(history_stack.end());
 }
 
 /**
@@ -56,12 +62,20 @@ void Sheet::update(History updateMessage) {
  * TODO: Finish the code.
  * Make sure that your function outputs the same format as the sample output.
  */
-void Sheet::undo() {
+void Sheet::undo()
+{
     string prefix = "Sheet_" + to_string(id) + " Undo: ";
 
     //=========== TODO ================
-
-
+    if (current_status != history_stack.begin())
+    {
+        --current_status;
+        std::cout << prefix << "Undo by performing " << '"' << *current_status << '"' << std::endl;
+    }
+    else
+    {
+        std::cout << prefix << "No history for undo!" << std::endl;
+    }
 }
 
 /**
@@ -70,14 +84,23 @@ void Sheet::undo() {
  * TODO: Finish the code.
  * Make sure that your function outputs the same format as the sample output.
  */
-void Sheet::redo() {
+void Sheet::redo()
+{
     string prefix = "Sheet_" + to_string(id) + " Redo: ";
 
     //=========== TODO =================
-    
-
+    if (current_status != std::prev(history_stack.end()))
+    {
+        ++current_status;
+        std::cout << prefix << "Redo by performing " << '"' << *current_status << '"' << std::endl;
+    }
+    else
+    {
+        std::cout << prefix << "No history for redo!" << std::endl;
+    }
 }
 
-int Sheet::get_id() const {
+int Sheet::get_id() const
+{
     return id;
 }

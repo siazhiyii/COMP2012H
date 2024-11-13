@@ -10,7 +10,7 @@ Column<T>::Column(std::string key, const T &default_value, int capacity)
     this->_size = 0;
     this->capacity = capacity;
     this->data = new T[capacity];
-}   
+}
 
 template <typename T>
 Column<T> &Column<T>::operator=(const Column<T> &other)

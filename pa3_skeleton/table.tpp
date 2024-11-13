@@ -277,13 +277,11 @@ void Table::setupColumn(std::string key, const T &default_value)
         {
             newColKeyList[i] = colKeyList[i];
         }
-        delete[] colKeyList;
     }
+    delete[] colKeyList;
     newColKeyList[totalCols - 1] = key;
-
     colKeyList = newColKeyList;
 }
-
 
 void Table::removeColumn(std::string key)
 {
@@ -393,6 +391,8 @@ Table &Table::operator=(const Table &other)
         }
     }
 
+    delete[] colKeyList;
+
     if (other.colKeyList)
     {
         colKeyList = new std::string[getTotalNumCols()];
@@ -482,6 +482,8 @@ Table::Table(const Table &other)
         }
     }
 
+    delete[] colKeyList;
+
     if (other.colKeyList)
     {
         colKeyList = new std::string[getTotalNumCols()];
@@ -524,7 +526,6 @@ Table::~Table()
 
     delete[] colKeyList;
 }
-
 
 template <typename T>
 void Table::insertEntryForColumn(std::string key, const T &field)
@@ -894,6 +895,8 @@ Table Table::select(const std::string (&selectKeys)[arrSize]) const
         }
     }
 
+    delete[] result.colKeyList;
+
     result.colKeyList = new std::string[arrSize];
     for (int i = 0; i < arrSize; ++i)
     {
@@ -1076,7 +1079,7 @@ Table Table::renameColumn(const std::string (&oriName)[arrSize], const std::stri
             result.insertEntryForColumn<double>(key, (*double_cols[j])[i]);
         }
     }
-
+    delete[] result.colKeyList;
     result.colKeyList = new std::string[getTotalNumCols()];
     for (int i = 0; i < getTotalNumCols(); ++i)
     {
@@ -1229,7 +1232,6 @@ Table Table::sortBy(std::string key, bool descending) const
     {
         return *this;
     }
-
 
     Table sortedTable(this->name);
 

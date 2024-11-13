@@ -644,7 +644,8 @@ int main()
         else if (caseID == 99)
         {
             string name = "TEST TEST TEST";
-            cout << IDX << caseID << NAME << name << endl << LINE << endl;
+            cout << IDX << caseID << NAME << name << endl
+                 << LINE << endl;
 
             Table table("TESTER");
             cout << LINE << endl;

@@ -38,7 +38,11 @@ Excel::Excel() {
 Excel::~Excel() {
 
     // ========== TODO =========
-
+    for (Sheet* sheet : sheets) {
+        delete sheet;
+    }
+    sheets.clear();
+    cout << "Excel: You have closed the Excel workbook." << endl;
 
 }
 
@@ -53,7 +57,10 @@ Excel::~Excel() {
 Sheet* Excel::open_sheet() {
     
     // ========== TODO =========
-
+    int id = sheets.size();
+    Sheet* sheet = new Sheet(id);
+    sheets.push_back(sheet);
+    return sheet;
 
 }
 
@@ -67,8 +74,15 @@ Sheet* Excel::open_sheet() {
 void Excel::close_sheet(Sheet* sheet) {
 
     // ========== TODO =========
-
-
+    for (size_t i = 0; i < sheets.size(); ++i) {
+        if (sheets[i] == sheet) {
+            std::cout << "Excel: Closing Sheet_" << sheet->get_id() << std::endl;
+            delete sheets[i];
+            sheets.erase(sheets.begin() + i);
+            return;
+        }
+    }
+    std::cout << "Excel: Cannot find this sheet for closing, something must be wrong!" << std::endl;
 }
 
 /**
@@ -83,6 +97,12 @@ void Excel::close_sheet(Sheet* sheet) {
 Sheet* Excel::get_sheet(int id) {
 
     // ========== TODO =========
-
-    
+for (size_t i = 0; i < sheets.size(); ++i) {
+        if (sheets[i]->get_id() == id) {
+            std::cout << "Excel: Getting Sheet_" << id << std::endl;
+            return sheets[i];
+        }
+    }
+    std::cout << "Excel: Cannot find the sheet during get, something must be wrong!" << std::endl;
+    return nullptr;
 }
