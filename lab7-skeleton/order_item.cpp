@@ -50,7 +50,12 @@ int Food::get_price() const
  *   Set name and price of the inherited Food class.
  */
 //=========== TODO ===================================================
-Burger::Burger(std::string name, int price, std::string modifier) : Food(name, price), modifier(modifier) {}
+Burger::Burger(std::string name, int price, std::string modifier) : Food(name, price), modifier(modifier) {
+	if (modifier != "None")
+	{
+		set_name(name + " (" + modifier + ")");
+	}
+}
 
 //--------------------------------------------------------------------
 
