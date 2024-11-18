@@ -51,7 +51,7 @@ int Food::get_price() const
  */
 //=========== TODO ===================================================
 Burger::Burger(std::string name, int price, std::string modifier) : Food(name, price), modifier(modifier) {
-	if (modifier != "None")
+	if (!modifier.empty())
 	{
 		set_name(name + " (" + modifier + ")");
 	}
