@@ -347,6 +347,13 @@ Drink *Drink::order_drink()
 
 Combo::Combo(Burger *burger, Fries *fries, Drink *drink) : burger(burger), fries(fries), drink(drink) {}
 
+Combo::~Combo()
+{
+	delete burger;
+	delete fries;
+	delete drink;
+}
+
 std::string Combo::get_name() const
 {
 	std::string name = "Combo ";
