@@ -209,7 +209,7 @@ class Combo: public OrderItem {
 		
 		Combo(Burger* burger, Fries* fries, Drink* drink);
 
-		~Combo();
+		virtual ~Combo();
 
 		virtual std::string get_name() const override;
 

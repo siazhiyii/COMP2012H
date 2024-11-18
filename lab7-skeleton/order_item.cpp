@@ -50,7 +50,8 @@ int Food::get_price() const
  *   Set name and price of the inherited Food class.
  */
 //=========== TODO ===================================================
-Burger::Burger(std::string name, int price, std::string modifier) : Food(name, price), modifier(modifier) {
+Burger::Burger(std::string name, int price, std::string modifier) : Food(name, price), modifier(modifier)
+{
 	if (!modifier.empty())
 	{
 		set_name(name + " (" + modifier + ")");
@@ -349,9 +350,9 @@ Combo::Combo(Burger *burger, Fries *fries, Drink *drink) : burger(burger), fries
 
 Combo::~Combo()
 {
-	delete[] burger;
-	delete[] fries;
-	delete[] drink;
+	delete burger;
+	delete fries;
+	delete drink;
 }
 
 std::string Combo::get_name() const
@@ -429,6 +430,9 @@ Combo *Combo::order_combo()
 	//--------------------------------------------------------------------
 
 	std::cout << "Insufficient number of items. Order cancelled." << std::endl;
+	delete burger;
+	delete fries;
+	delete drink;
 	return nullptr;
 }
 
