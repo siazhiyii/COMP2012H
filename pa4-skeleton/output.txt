@@ -1,0 +1,170 @@
+Test Case 1: Part I - Testing calculateEmployee
+--------------------------------------------------
+
+=== Full Time Employee Details ===
+ID: 1
+Name: John Doe
+Level: Senior
+Base Salary: $80000.00
+Bonus: $5000.00
+Stock Options: $1000.00
+Total Compensation: $86000.00
+===============================
+
+
+
+Test Case 2: Part I - Testing calculateEmployee
+--------------------------------------------------
+
+=== Contract Employee Details ===
+ID: 2
+Name: Jane Smith
+Level: Mid
+Hours Worked: 40
+Hourly Rate: $75.00
+Total Compensation: $3000.00
+===============================
+
+
+
+Test Case 3: Part II - Testing insert
+--------------------------------------------------
+Root value: 10
+Tree size: 1
+
+
+
+Test Case 4: Part II - Testing insert
+--------------------------------------------------
+Root value: 10
+Tree size: 1
+
+
+
+Test Case 5: Part II - Testing insert
+--------------------------------------------------
+Can find 5? true
+Can find 15? false
+Tree is balanced with size: 3
+Height of tree: 1
+
+
+
+Test Case 6: Part II - Testing insert
+--------------------------------------------------
+Tree is with size: 1
+
+
+
+Test Case 7: Part II - Testing remove
+--------------------------------------------------
+Remove from empty tree result: false
+
+
+
+Test Case 8: Part II - Testing remove
+--------------------------------------------------
+Original tree size: 3
+Remove 5 from tree: true
+5 exist in tree: false
+New tree size: 2
+
+
+
+Test Case 9: Part II - Testing remove
+--------------------------------------------------
+Original tree size: 3
+Remove 10 from tree: true
+New tree size: 2
+
+
+
+Test Case 10: Part II - Testing inorderTraversal
+--------------------------------------------------
+Empty tree traversal size: 0
+
+
+
+Test Case 11: Part II - Testing inorderTraversal
+--------------------------------------------------
+Inorder tree traversal size: 5
+Inorder traversal: 3 5 7 10 15 
+
+
+
+Test Case 12: Part III - Testing addEmployee
+--------------------------------------------------
+Employee Count: 1
+
+=== Full Time Employee Details ===
+ID: 1
+Name: John Doe
+Level: Senior
+Base Salary: $80000.00
+Bonus: $5000.00
+Stock Options: $1000.00
+Total Compensation: $86000.00
+===============================
+
+
+
+Test Case 13: Part III - Testing addEmployee
+--------------------------------------------------
+Employee Count: 1
+
+=== Contract Employee Details ===
+ID: 1
+Name: Jane Smith
+Level: Mid
+Hours Worked: 40
+Hourly Rate: $75.00
+Total Compensation: $3000.00
+===============================
+
+
+
+Test Case 14: Part III - Testing findEmployeeById
+--------------------------------------------------
+
+=== Full Time Employee Details ===
+ID: 1
+Name: John Doe
+Level: Senior
+Base Salary: $80000.00
+Bonus: $5000.00
+Stock Options: $1000.00
+Total Compensation: $86000.00
+===============================
+
+
+
+Test Case 15: Part III - Testing getEmployeesByRole
+--------------------------------------------------
+Number of query results: 1
+
+=== Full Time Employee Details ===
+ID: 1
+Name: John Doe
+Level: Senior
+Base Salary: $80000.00
+Bonus: $5000.00
+Stock Options: $1000.00
+Total Compensation: $86000.00
+===============================
+
+
+
+Test Case 16: Part III - Testing findEmployeeByName
+--------------------------------------------------
+
+=== Contract Employee Details ===
+ID: 2
+Name: Jane Smith
+Level: Mid
+Hours Worked: 40
+Hourly Rate: $75.00
+Total Compensation: $3000.00
+===============================
+
+
+
